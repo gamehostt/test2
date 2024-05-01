@@ -1,0 +1,64 @@
+import pandas as pd
+import numpy as np
+from sklearn.model_selection import train_test_split
+from sklearn.svm import SVC
+from sklearn.preprocessing import LabelEncoder, StandardScaler
+from sklearn.metrics import accuracy_score
+import matplotlib.pyplot as plt
+
+
+# Load the dataset
+data = pd.read_csv("train.csv")
+
+# Check for missing values
+print(data.isnull().sum())
+
+# Drop rows with missing values
+data = data.dropna()
+
+# Preprocess 'Dependents' column
+data['Dependents'] = data['Dependents'].str.rstrip('+')  # Remove '+' from 'Dependents' values
+data['Dependents'] = data['Dependents'].astype(int)      # Convert to integer
+
+# Encode categorical variables
+label_encoder = LabelEncoder()
+data['Gender'] = label_encoder.fit_transform(data['Gender'])
+data['Married'] = label_encoder.fit_transform(data['Married'])
+data['Education'] = label_encoder.fit_transform(data['Education'])
+data['Self_Employed'] = label_encoder.fit_transform(data['Self_Employed'])
+data['Property_Area'] = label_encoder.fit_transform(data['Property_Area'])
+data['Loan_Status'] = label_encoder.fit_transform(data['Loan_Status'])
+
+# Split features and target variable
+X = data.drop(['Loan_ID', 'Loan_Status'], axis=1)
+y = data['Loan_Status']
+
+# Scale numerical features
+scaler = StandardScaler()
+X_scaled = scaler.fit_transform(X)
+
+# Split the dataset into training and testing sets
+X_train, X_test, y_train, y_test = train_test_split(X_scaled, y, test_size=0.2, random_state=42)
+
+# Train SVM models with different kernels
+from sklearn.svm import SVC
+from sklearn.preprocessing import PolynomialFeatures
+from sklearn.pipeline import make_pipeline
+
+kernels = ['linear', 'rbf', 'poly']
+models = {}
+for kernel in kernels:
+    if kernel == 'poly':
+        svm_model = make_pipeline(PolynomialFeatures(3), SVC(kernel=kernel))
+    else:
+        svm_model = SVC(kernel=kernel)
+    svm_model.fit(X_train, y_train)
+    models[kernel] = svm_model
+
+
+# Evaluate SVM models
+for kernel, model in models.items():
+    y_pred = model.predict(X_test)
+    accuracy = accuracy_score(y_test, y_pred)
+    print(f"Accuracy of SVM model with {kernel} kernel: {accuracy}")
+
