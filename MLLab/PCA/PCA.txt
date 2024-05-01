@@ -1,0 +1,68 @@
+import pandas as pd 
+import numpy as np
+import matplotlib.pyplot as plt
+from sklearn.decomposition import PCA
+from sklearn.preprocessing import StandardScaler
+
+df = pd.read_csv('Pizza.csv')
+df.head()
+
+# split data table into data X and class labels y
+
+X = df.iloc[:,2:9].values
+y = df.iloc[:,0].values
+
+X_std = StandardScaler().fit_transform(X)
+
+pca = PCA(n_components=2)
+principalComponents = pca.fit_transform(X_std)
+principalDf = pd.DataFrame(data = principalComponents
+             , columns = ['component1', 'component2'])
+
+
+principalDf.head()
+
+label_dict = {1: 'A', 2: 'B', 3: 'C', 4:'D', 5:'E', 6:'F', 7:'G', 8:'H', 9:'I', 10:'J'}
+
+feature_dict = {0: 'mois',
+                1: 'prot',
+                2: 'fat',
+                3: 'ash',
+               4:'sodium',
+               5:'carb',
+               6:'cal'}
+
+finalDf = pd.concat([principalDf, df[['brand']]], axis = 1)
+
+fig = plt.figure(figsize = (8,8))
+ax = fig.add_subplot(1,1,1) 
+ax.set_xlabel('component1', fontsize = 15)
+ax.set_ylabel('component2', fontsize = 15)
+ax.set_title('2 component PCA', fontsize = 20)
+targets = list(label_dict.values())
+
+for target in targets:
+    indicesToKeep = finalDf['brand'] == target
+    ax.scatter(finalDf.loc[indicesToKeep, 'component1']
+               , finalDf.loc[indicesToKeep, 'component2']
+               , s = 50)
+ax.legend(targets)
+ax.grid()
+
+print(abs( pca.components_ ))
+
+
+# number of components
+n_pcs= pca.components_.shape[0]
+
+# get the index of the most important feature on EACH component
+most_important = [np.abs(pca.components_[i]).argmax() for i in range(n_pcs)]
+
+initial_feature_names = list(label_dict.values())
+# get the names
+most_important_names = [initial_feature_names[most_important[i]] for i in range(n_pcs)]
+
+# LIST COMPREHENSION HERE AGAIN
+dic = {'PC{}'.format(i): most_important_names[i] for i in range(n_pcs)}
+
+print(dic)
