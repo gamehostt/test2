@@ -1,0 +1,41 @@
+import pandas as pd
+import numpy as np
+from collections import Counter
+
+data = pd.read_csv("data4_19.csv")
+
+def euclidean_distance(x1, x2):
+    return np.sqrt(np.sum((x1 - x2) ** 2))
+
+def manhattan_distance(x1, x2):
+    return np.sum(np.abs(x1 - x2))
+
+def knn_predict(train_data, test_instance, k, distance_measure):
+    distances = []
+    for index, row in train_data.iterrows():
+        features = row[:-1]  
+        label = row[-1]     
+        distance = distance_measure(features, test_instance)
+        distances.append((distance, label))
+    
+    distances.sort(key=lambda x: x[0])
+    neighbors = distances[:k]
+    
+    class_votes = Counter([neighbor[1] for neighbor in neighbors])
+    
+    return class_votes.most_common(1)[0][0]
+
+attributes = [5.2, 3.1, 1.4, 0.2]
+distance_measures = {
+    "Euclidean Distance": euclidean_distance,
+    "Manhattan Distance": manhattan_distance
+}
+
+for distance_name, distance_func in distance_measures.items():
+    print(f"Distance Measure: {distance_name}")
+    for k in range(1, 6):  # Trying different values of k
+        prediction = knn_predict(data, attributes, k, distance_func)
+        print(f"K = {k}, Predicted Species: {prediction}")
+    print()
+
+    
