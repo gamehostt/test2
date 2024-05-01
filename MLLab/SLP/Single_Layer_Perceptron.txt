@@ -1,0 +1,283 @@
+import pandas as pd
+import numpy as np
+
+
+
+class Perceptron:
+    def __init__(self):
+        self.weights = None
+        self.bias = 0
+        
+    def initialize(self,n_features):
+        self.weights = np.zeros(n_features)
+        self.bias = 0
+        return
+    
+    def predict(self,inputs):
+        activation = np.dot(inputs, self.weights) + self.bias
+        return 1 if activation > 0 else 0
+    
+    def train(self, X, y, epochs=100, learning_rate=0.1):
+        self.initialize(X.shape[1])
+        for epoch in range(epochs):
+            for inputs, label in zip(X,y):
+                y_pred = self.predict(inputs)
+                error = label - y_pred
+                self.weights += learning_rate * error * inputs
+                self.bias += learning_rate * error
+        return
+
+X_train = np.array([[0, 0], [0, 1], [1, 0], [1, 1]])
+y_train = np.array([0, 0, 0, 1])
+
+p = Perceptron()
+p.train(X_train, y_train, epochs=100, learning_rate=0.1)
+test_input = np.array([0, 0])
+print(p.predict(test_input))  # Output: 0
+
+# OR
+X_train = np.array([[0, 0], [0, 1], [1, 0], [1, 1]])
+y_train = np.array([0, 1, 1, 1])
+
+p = Perceptron()
+p.train(X_train, y_train, epochs=100, learning_rate=0.1)
+test_input = np.array([0, 1])
+print(p.predict(test_input))  # Output: 1
+
+#OR Single Layer Perceptron
+
+import numpy as np
+
+class Perceptron:
+    def __init__(self, N, alpha=0.1):
+        self.W =np.random.randn(N+1)/np.sqrt(N)
+        self.alpha = alpha
+        print("Initial weight : ",self.W)
+        
+    def step(self, X):
+        return 1 if X > 0 else 0
+    
+    def fit(self, X, y , epochs = 10):
+        X=np.c_[X, np.ones((X.shape[0]))]
+        
+        for epoch in np.arange(0, epochs):
+            for (x, target) in zip(X,y):
+                p=self.step(np.dot(x, self.W))
+                if p!=target:
+                    error=p-target
+                    self.W += - self.alpha * error * x
+                    print(self.W)
+                    
+    def predict(self, X, addBias=True):
+        X = np.atleast_2d(X)
+        if addBias:
+            X = np.c_[X, np.ones((X.shape[0]))]
+        return self.step(np.dot(X, self.W))
+
+import numpy as np
+# construct the OR dataset
+X = np.array([[0, 0], [0, 1], [1, 0], [1, 1]])
+y = np.array([[0], [1], [1], [1]])
+# define our perceptron and train it
+print("[INFO] training perceptron...")
+p = Perceptron(X.shape[1], alpha=0.1)
+p.fit(X, y, epochs=20)
+
+print("[INFO] testing perceptron...")
+# now that our network is trained, loop over the data points
+for (x, target) in zip(X, y):
+    pred = p.predict(x)
+    print("[INFO] data={}, ground-truth={}, pred={}".format(x, target[0], pred))
+
+print(p.W)
+
+#AND Single Layer Perceptron
+
+import numpy as np
+
+class Perceptron:
+    def __init__(self, N, alpha=0.1):
+        self.W =np.random.randn(N+1)/np.sqrt(N)
+        self.alpha = alpha
+        print("Initial weight : ",self.W)
+        
+    def step(self, X):
+        return 1 if X > 0 else 0
+    
+    def fit(self, X, y , epochs = 10):
+        X=np.c_[X, np.ones((X.shape[0]))]
+        
+        for epoch in np.arange(0, epochs):
+            for (x, target) in zip(X,y):
+                p=self.step(np.dot(x, self.W))
+                if p!=target:
+                    error=p-target
+                    self.W += - self.alpha * error * x
+                    
+    def predict(self, X, addBias=True):
+        X = np.atleast_2d(X)
+        if addBias:
+            X = np.c_[X, np.ones((X.shape[0]))]
+        return self.step(np.dot(X, self.W))
+
+import numpy as np
+# construct the AND dataset
+X = np.array([[0, 0], [0, 1], [1, 0], [1, 1]])
+y = np.array([[0], [0], [0], [1]])
+# define our perceptron and train it
+print("[INFO] training perceptron...")
+p = Perceptron(X.shape[1], alpha=0.1)
+p.fit(X, y, epochs=20)
+
+print("[INFO] testing perceptron...")
+# now that our network is trained, loop over the data points
+for (x, target) in zip(X, y):
+    pred = p.predict(x)
+    print("[INFO] data={}, ground-truth={}, pred={}".format(x, target[0], pred))
+
+print(p.W)
+
+#XOR MultiLayer Perceptron
+
+import numpy as np
+
+def sigmoid(x):
+	return 1.0/(1.0 + np.exp(-x))
+
+def sigmoid_der(x):
+	return x*(1.0 - x)
+
+class NN:
+    def __init__(self, inputs):
+        self.inputs = inputs
+        self.l=len(self.inputs)
+        self.li=len(self.inputs[0])
+
+        self.wi=np.random.random((self.li, self.l))
+        self.wh=np.random.random((self.l, 1))
+
+    def think(self, inp):
+        s1=sigmoid(np.dot(inp, self.wi))
+        s2=sigmoid(np.dot(s1, self.wh))
+        return s2
+
+    def train(self, inputs,outputs, it):
+        for i in range(it):
+            l0=inputs
+            l1=sigmoid(np.dot(l0, self.wi))
+            l2=sigmoid(np.dot(l1, self.wh))
+
+            l2_err=outputs - l2
+            l2_delta = np.multiply(l2_err, sigmoid_der(l2))
+
+            l1_err=np.dot(l2_delta, self.wh.T)
+            l1_delta=np.multiply(l1_err, sigmoid_der(l1))
+
+            self.wh+=np.dot(l1.T, l2_delta)
+            self.wi+=np.dot(l0.T, l1_delta)
+
+inputs=np.array([[0,0], [0,1], [1,0], [1,1] ])
+outputs=np.array([ [0], [1],[1],[0] ])
+
+n=NN(inputs)
+print("Before Training")
+print(n.think(inputs))
+n.train(inputs, outputs, 100000)
+print("After Training")
+print(n.think(inputs))
+
+#3) Single Layer Perceptron for given weights
+import numpy as np
+
+class Perceptron:
+    def __init__(self, N, alpha=0.1):
+        self.W =[.75,.5,-.6]
+        self.alpha = alpha
+        print("Initial weight : ",self.W)
+        
+    def step(self, X):
+        return 1 if X >= 0 else -1
+    
+    def fit(self, X, y , epochs = 10):
+        X=np.c_[np.ones((X.shape[0])), X]
+        
+        for epoch in np.arange(0, epochs):
+            for (x, target) in zip(X,y):
+                p=self.step(np.dot(x, self.W))
+                if p!=target:
+                    error=p-target
+                    self.W += - self.alpha * error * x
+                    print(self.W)
+                    
+    def predict(self, X, addBias=True):
+        X = np.atleast_2d(X)
+        if addBias:
+            X = np.c_[np.ones((X.shape[0])), X]
+        return self.step(np.dot(X, self.W))
+
+import numpy as np
+# construct the OR dataset
+X = np.array([[7, 7], [2.8, 0.8], [1.2, 3], [7.8, 6.1]])
+y = np.array([[-1], [1], [1], [-1]])
+# define our perceptron and train it
+print("[INFO] training perceptron...")
+p = Perceptron(X.shape[1], alpha=0.2)
+p.fit(X, y, epochs=4)
+
+print("[INFO] testing perceptron...")
+# now that our network is trained, loop over the data points
+for (x, target) in zip(X, y):
+    pred = p.predict(x)
+    print("[INFO] data={}, ground-truth={}, pred={}".format(x, target[0],pred))
+
+print(p.W)
+
+#4b bias -0.5
+
+#OR Single Layer Perceptron
+
+import numpy as np
+
+class Perceptron:
+    def __init__(self, N, alpha=0.1):
+        self.W =[-0.5,1,1]
+        self.alpha = alpha
+        print("Initial weight : ",self.W)
+        
+    def step(self, X):
+        return 1 if X > 0 else 0
+    
+    def fit(self, X, y , epochs = 10):
+        X=np.c_[np.ones((X.shape[0])), X]
+        
+        for epoch in np.arange(0, epochs):
+            for (x, target) in zip(X,y):
+                p=self.step(np.dot(x, self.W))
+                if p!=target:
+                    error=p-target
+                    self.W += - self.alpha * error * x
+                    print(self.W)
+                    
+    def predict(self, X, addBias=True):
+        X = np.atleast_2d(X)
+        if addBias:
+            X = np.c_[np.ones((X.shape[0])), X]
+        print(np.dot(X, self.W))
+        return self.step(np.dot(X, self.W))
+
+import numpy as np
+# construct the OR dataset
+X = np.array([[0, 0], [0, 1], [1, 0], [1, 1]])
+y = np.array([[0], [1], [1], [1]])
+# define our perceptron and train it
+print("[INFO] training perceptron...")
+p = Perceptron(X.shape[1], alpha=0.1)
+p.fit(X, y, epochs=20)
+
+print("[INFO] testing perceptron...")
+# now that our network is trained, loop over the data points
+for (x, target) in zip(X, y):
+    pred = p.predict(x)
+    print("[INFO] data={}, ground-truth={}, pred={}".format(x, target[0], pred))
+
+print(p.W)
