@@ -1,0 +1,34 @@
+import numpy as np
+from sklearn.linear_model import LinearRegression
+
+x=np.array([1,2,3,4,5]).reshape((-1,1))
+y=np.array([1.2,1.8,2.6,3.2,3.8])
+x_test = np.array([7,12]).reshape((-1,1))
+model = LinearRegression()
+model = LinearRegression().fit(x,y)
+r_sq = model.score(x,y)
+print(f"Coefficient of determination: {r_sq}")
+print(f"intercept: {model.intercept_}")
+print(f"slope: {model.coef_}")
+
+y_pred = model.predict(x_test)
+print(f"Predicted Response:\n {y_pred}")
+from sklearn.datasets import load_breast_cancer
+from sklearn.linear_model import LogisticRegression
+from sklearn.model_selection import train_test_split
+from sklearn.metrics import accuracy_score
+# load the breast cancer dataset
+X=np.array([29,15,33,28,39]).reshape(-1,1)
+y=np.array([0,0,1,1,1])
+
+# split the train and test dataset
+X_train, X_test,y_train, y_test = train_test_split(X, y,test_size=0.20,random_state=23)
+# LogisticRegression
+clf = LogisticRegression(random_state=0)
+clf.fit(X_train, y_train)
+x_test = np.array([33]).reshape(-1,1)
+# Prediction
+y_pred = clf.predict(x_test)
+print("Predicted y:",y_pred,"Actual y:", y_test,"X test:", x_test)
+acc = accuracy_score(y_test, y_pred)
+print("Logistic Regression model accuracy (in %):", acc*100)
